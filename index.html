@@ -185,6 +185,34 @@ tr:hover td{background:rgba(0,255,204,.018);}
 .load-r{text-align:center;padding:34px;color:var(--text3);}
 .spin{display:inline-block;width:15px;height:15px;border:2px solid var(--border2);border-top-color:var(--aqua);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px;}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* PIN MANAGEMENT */
+.pin-mgmt{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:18px;overflow:hidden;}
+.pm-top{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--bg3);}
+.pm-top h3{font-size:13px;color:var(--text);font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.pm-info{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);}
+.pm-stat{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:10px 14px;text-align:center;}
+.pm-stat-n{font-size:20px;font-weight:700;font-family:var(--mono);color:var(--aqua);}
+.pm-stat-l{font-size:10px;color:var(--text3);margin-top:2px;}
+.pin-list{padding:0;}
+.pin-row-item{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;transition:background .12s;}
+.pin-row-item:last-child{border-bottom:none;}
+.pin-row-item:hover{background:rgba(0,255,204,.015);}
+.pin-code{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--aqua);letter-spacing:3px;background:var(--bg3);border:1px solid var(--border2);padding:6px 14px;border-radius:6px;}
+.pin-badge{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.pin-unused{background:rgba(0,255,204,.1);color:var(--aqua);border:1px solid rgba(0,255,204,.2);}
+.pin-used{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.2);}
+.pin-meta{font-size:11px;color:var(--text2);}
+.pin-empty{padding:30px;text-align:center;color:var(--text3);font-size:12px;}
+/* Generate PIN modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px;width:90%;max-width:420px;text-align:center;box-shadow:0 0 40px rgba(0,255,204,.1);}
+.modal h3{font-size:18px;color:var(--aqua);margin-bottom:8px;}
+.modal p{color:var(--text2);font-size:13px;margin-bottom:20px;line-height:1.5;}
+.gen-pin-display{font-family:var(--mono);font-size:36px;font-weight:900;color:var(--aqua);letter-spacing:6px;background:var(--bg3);border:2px solid var(--aqua);border-radius:10px;padding:16px 24px;margin:0 auto 20px;display:inline-block;text-shadow:0 0 20px rgba(0,255,204,.4);}
+.modal-btns{display:flex;gap:10px;justify-content:center;}
+.modal-close{background:none;border:1px solid var(--border2);color:var(--text2);padding:8px 16px;border-radius:6px;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:700;text-transform:uppercase;transition:.2s;}
+.modal-close:hover{border-color:var(--red);color:var(--red);}
 </style>
 </head>
 <body>
@@ -301,6 +329,7 @@ tr:hover td{background:rgba(0,255,204,.018);}
                 <li onclick="filterClean()">✅ Clean Only</li>
                 <li onclick="filterThreats()">⚠️ Threats Only</li>
                 <li onclick="showAll()">📋 All Scans</li>
+                <li onclick="showPinView()">🔑 PIN Manager</li>
             </ul>
             <div class="sb-foot">
                 <button class="btn btn-red" style="width:100%;padding:8px" onclick="logout()">🚪 Logout</button>
@@ -317,6 +346,20 @@ tr:hover td{background:rgba(0,255,204,.018);}
                 <div class="dsc"><div class="dsc-n" id="d-fil" style="color:var(--green)">--</div><div class="dsc-l">Files Scanned</div></div>
                 <div class="dsc"><div class="dsc-n" id="d-cln" style="color:var(--aqua)">--</div><div class="dsc-l">Clean Scans</div></div>
             </div>
+            <!-- PIN MANAGEMENT -->
+            <div class="pin-mgmt" id="pin-section">
+                <div class="pm-top">
+                    <h3>🔑 PIN Management</h3>
+                    <button class="btn btn-aqua" onclick="generatePin()">+ Generate New PIN</button>
+                </div>
+                <div class="pm-info">
+                    <div class="pm-stat"><div class="pm-stat-n" id="pm-active">--</div><div class="pm-stat-l">Active PINs</div></div>
+                    <div class="pm-stat"><div class="pm-stat-n" id="pm-used">--</div><div class="pm-stat-l">Used PINs</div></div>
+                    <div class="pm-stat"><div class="pm-stat-n" id="pm-total">--</div><div class="pm-stat-l">Total Generated</div></div>
+                </div>
+                <div class="pin-list" id="pin-list"><div class="pin-empty"><span class="spin"></span> Loading PINs...</div></div>
+            </div>
+
             <div class="table-card">
                 <div class="tc-top">
                     <h3>All Scan Results</h3>
@@ -513,6 +556,116 @@ function filterClean(){renderTable(allScans.filter(s=>s.threats===0));}
 function filterThreats(){renderTable(allScans.filter(s=>s.threats>0));}
 function showAll(){renderTable(allScans);}
 function openRes(sc){renderResults(sc);showView('results');}
+
+// ── PIN MANAGEMENT ──
+let currentPin='';
+
+async function sPost(path, body){
+    const r=await fetch(SUPA_URL+path,{
+        method:'POST',headers:{...SH,'Content-Type':'application/json','Prefer':'return=representation'},
+        mode:'cors',body:JSON.stringify(body)
+    });
+    if(!r.ok)throw new Error(await r.text());
+    return r.json();
+}
+
+async function loadPins(){
+    const list=document.getElementById('pin-list');
+    try{
+        const pins=await sGet('/rest/v1/pins?select=*&order=id.desc&limit=50');
+        const active=pins.filter(p=>!p.used).length;
+        const used=pins.filter(p=>p.used).length;
+        document.getElementById('pm-active').textContent=active;
+        document.getElementById('pm-used').textContent=used;
+        document.getElementById('pm-total').textContent=pins.length;
+
+        if(!pins.length){list.innerHTML='<div class="pin-empty">No PINs generated yet. Click "+ Generate New PIN" to create one.</div>';return;}
+
+        list.innerHTML='';
+        pins.forEach(p=>{
+            const created=p.created_at?new Date(p.created_at).toLocaleString():'—';
+            const expires=p.expires_at?new Date(p.expires_at).toLocaleString():'—';
+            const badge=p.used
+                ?`<span class="pin-badge pin-used">✅ USED</span>`
+                :`<span class="pin-badge pin-unused">⏳ WAITING</span>`;
+            const div=document.createElement('div');
+            div.className='pin-row-item';
+            div.innerHTML=`
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div class="pin-code">${p.pin}</div>
+                    ${badge}
+                </div>
+                <div style="text-align:right;">
+                    <div class="pin-meta">Created: ${created}</div>
+                    <div class="pin-meta">Expires: ${expires}</div>
+                    ${p.username?`<div class="pin-meta" style="color:var(--aqua)">User: ${p.username}</div>`:''}
+                </div>
+                <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px;color:var(--red);border-color:var(--red)" onclick="deletePin(${p.id})">✕</button>`;
+            list.appendChild(div);
+        });
+    }catch(e){
+        list.innerHTML=`<div class="pin-empty" style="color:var(--red)">Error loading PINs: ${e.message}</div>`;
+    }
+}
+
+async function generatePin(){
+    // Generate random 8-digit PIN
+    const pin=String(Math.floor(10000000+Math.random()*90000000));
+    const expires=new Date(Date.now()+24*60*60*1000).toISOString();
+    const username=document.getElementById('sb-name').textContent||'Admin';
+    try{
+        await sPost('/rest/v1/pins',{pin,username,expires_at:expires,used:false});
+        currentPin=pin;
+        document.getElementById('modal-pin').textContent=pin;
+        document.getElementById('pin-modal').classList.add('open');
+        loadPins();
+    }catch(e){
+        alert('Error generating PIN: '+e.message);
+    }
+}
+
+function copyPin(){
+    navigator.clipboard.writeText(currentPin).then(()=>{
+        const btn=event.target;
+        btn.textContent='✅ Copied!';
+        setTimeout(()=>btn.textContent='📋 Copy PIN',2000);
+    });
+}
+
+function closePinModal(){
+    document.getElementById('pin-modal').classList.remove('open');
+}
+
+async function deletePin(id){
+    if(!confirm('Delete this PIN?'))return;
+    try{
+        await fetch(SUPA_URL+'/rest/v1/pins?id=eq.'+id,{
+            method:'DELETE',headers:SH,mode:'cors'
+        });
+        loadPins();
+    }catch(e){alert('Error: '+e.message);}
+}
+
+function showPinView(){
+    document.getElementById('pin-section').scrollIntoView({behavior:'smooth'});
+}
+
+// Load pins when dashboard loads
+const _origLoadDash=loadDash;
+loadDash=async function(){await _origLoadDash();loadPins();};
 </script>
+<!-- GENERATE PIN MODAL -->
+<div class="modal-overlay" id="pin-modal">
+    <div class="modal">
+        <h3>🔑 New PIN Generated</h3>
+        <p>Give this PIN to the user. They must enter it in the NEXUS scanner before scanning. The scan results will be linked to this PIN.</p>
+        <div class="gen-pin-display" id="modal-pin">--------</div>
+        <div class="modal-btns">
+            <button class="btn btn-aqua" onclick="copyPin()">📋 Copy PIN</button>
+            <button class="modal-close" onclick="closePinModal()">✕ Close</button>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:14px;">PIN expires in 24 hours • Single use</div>
+    </div>
+</div>
 </body>
 </html>
