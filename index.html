@@ -6,299 +6,328 @@
 <title>NEXUS AC — Anti-Cheat Scanner</title>
 <style>
 :root {
-    --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;
-    --border:#30363d;--border2:#444c56;
-    --red:#ff4444;--red2:#cc2222;
-    --cyan:#00d4ff;--cyan2:#0099cc;
-    --green:#3fb950;--yellow:#d29922;--orange:#f0883e;
-    --purple:#a371f7;
-    --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+    --bg:#020f0a;--bg2:#061a12;--bg3:#0a2419;--bg4:#0d2e20;
+    --border:#0f3d28;--border2:#1a5c3a;
+    --aqua:#00ffcc;--aqua2:#00cc9e;--aqua3:#009972;
+    --green:#00e676;--green2:#00b85a;
+    --red:#ff4466;--yellow:#ffcc00;--orange:#ff8800;
+    --text:#d4fff0;--text2:#6db898;--text3:#3d7a5a;
     --font:'Segoe UI',system-ui,sans-serif;--mono:'Consolas','Courier New',monospace;
+    --glow:0 0 20px rgba(0,255,204,0.12);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;}
-::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background-image:linear-gradient(rgba(0,255,204,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,204,0.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
 
-nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.logo{font-size:20px;font-weight:800;color:var(--cyan);letter-spacing:1px;cursor:pointer;display:flex;align-items:center;gap:10px;}
-.logo-shield{width:30px;height:30px;background:linear-gradient(135deg,var(--cyan),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+/* NAV */
+nav{background:rgba(2,15,10,0.95);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);box-shadow:var(--glow);}
+.logo{font-size:18px;font-weight:900;color:var(--aqua);letter-spacing:2px;display:flex;align-items:center;gap:10px;text-transform:uppercase;cursor:pointer;}
+.logo-icon{width:32px;height:32px;border:2px solid var(--aqua);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 10px rgba(0,255,204,0.3);}
 .nav-right{display:flex;align-items:center;gap:10px;}
-.btn{padding:7px 15px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;font-family:var(--font);text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all .2s;font-family:var(--font);letter-spacing:.5px;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-aqua{background:var(--aqua);color:#000;}
+.btn-aqua:hover{background:var(--aqua2);box-shadow:0 0 15px rgba(0,255,204,0.35);}
 .btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2);}
-.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);}
-.btn-cyan{background:var(--cyan);color:#000;}
-.btn-cyan:hover{background:var(--cyan2);}
+.btn-ghost:hover{border-color:var(--aqua);color:var(--aqua);}
+.btn-red{background:transparent;border:1px solid var(--red);color:var(--red);}
+.btn-red:hover{background:var(--red);color:#fff;}
+.nav-user{display:flex;align-items:center;gap:8px;}
+.nav-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--aqua),var(--green));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#000;}
+.online-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);animation:gpulse 2s infinite;margin-right:4px;}
+@keyframes gpulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,230,118,.5)}50%{opacity:.7;box-shadow:0 0 0 5px rgba(0,230,118,0)}}
 
-.view{display:none;}.view.active{display:block;}
+/* VIEWS */
+.view{display:none;position:relative;z-index:1;}.view.active{display:block;}
 
-/* LANDING */
-.hero{text-align:center;padding:80px 20px 60px;}
-.hero-badge{display:inline-block;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:var(--cyan);padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:1px;margin-bottom:20px;}
-.hero h1{font-size:68px;font-weight:900;line-height:1;letter-spacing:-2px;margin-bottom:14px;}
-.hero h1 span{color:var(--cyan);}
-.hero p{font-size:17px;color:var(--text2);max-width:500px;margin:0 auto 32px;line-height:1.6;}
+/* ══ LANDING ══ */
+.hero{text-align:center;padding:80px 20px 55px;}
+.hero-badge{display:inline-block;background:rgba(0,255,204,.08);border:1px solid rgba(0,255,204,.25);color:var(--aqua);padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:2px;margin-bottom:20px;text-transform:uppercase;}
+.hero h1{font-size:66px;font-weight:900;line-height:1;letter-spacing:-2px;margin-bottom:14px;color:var(--text);}
+.hero h1 span{color:var(--aqua);text-shadow:0 0 30px rgba(0,255,204,0.4);}
+.hero p{font-size:16px;color:var(--text2);max-width:480px;margin:0 auto 30px;line-height:1.65;}
 .hero-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.hero-btn-main{padding:12px 28px;font-size:14px;background:var(--aqua);color:#000;border-radius:8px;font-weight:700;cursor:pointer;border:none;font-family:var(--font);transition:all .2s;letter-spacing:.5px;text-transform:uppercase;}
+.hero-btn-main:hover{background:var(--aqua2);box-shadow:0 0 20px rgba(0,255,204,.4);transform:translateY(-1px);}
+.hero-btn-sec{padding:12px 28px;font-size:14px;background:transparent;color:var(--aqua);border-radius:8px;font-weight:700;cursor:pointer;border:1px solid var(--border2);font-family:var(--font);transition:all .2s;letter-spacing:.5px;text-transform:uppercase;}
+.hero-btn-sec:hover{border-color:var(--aqua);box-shadow:0 0 12px rgba(0,255,204,.15);}
 
-.pin-section{max-width:460px;margin:0 auto 60px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px;text-align:center;}
-.pin-section h3{font-size:17px;margin-bottom:7px;}
-.pin-section p{color:var(--text2);font-size:13px;margin-bottom:18px;}
-.pin-input-row{display:flex;gap:8px;}
-.pin-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:10px 12px;color:var(--text);font-size:22px;font-family:var(--mono);letter-spacing:5px;text-align:center;outline:none;}
-.pin-input:focus{border-color:var(--cyan);}
-.pin-error{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+.pin-section{max-width:440px;margin:0 auto 55px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px;text-align:center;box-shadow:var(--glow);}
+.pin-section h3{font-size:16px;color:var(--text);margin-bottom:6px;}
+.pin-section p{color:var(--text2);font-size:12px;margin-bottom:16px;line-height:1.5;}
+.pin-row{display:flex;gap:8px;}
+.pin-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:10px 12px;color:var(--aqua);font-size:20px;font-family:var(--mono);letter-spacing:5px;text-align:center;outline:none;transition:border-color .2s;}
+.pin-input:focus{border-color:var(--aqua);box-shadow:0 0 10px rgba(0,255,204,.1);}
+.pin-err{color:var(--red);font-size:12px;margin-top:8px;display:none;}
 
-.features{max-width:1100px;margin:0 auto 70px;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;}
-.feat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;transition:border-color .2s;}
-.feat-card:hover{border-color:var(--border2);}
-.feat-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px;}
-.feat-card h4{font-size:14px;margin-bottom:7px;}
-.feat-card p{color:var(--text2);font-size:13px;line-height:1.6;}
-footer{border-top:1px solid var(--border);padding:28px;text-align:center;color:var(--text3);font-size:13px;}
+.features{max-width:1000px;margin:0 auto 60px;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+.feat{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:20px;transition:border-color .2s,box-shadow .2s;}
+.feat:hover{border-color:var(--border2);box-shadow:var(--glow);}
+.feat-ic{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:12px;}
+.feat h4{font-size:13px;color:var(--text);margin-bottom:6px;}
+.feat p{color:var(--text2);font-size:12px;line-height:1.6;}
+footer{border-top:1px solid var(--border);padding:24px;text-align:center;color:var(--text3);font-size:12px;position:relative;z-index:1;}
 
-/* RESULTS */
-.results-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-.results-header-left{display:flex;align-items:center;gap:14px;}
-.results-icon{width:42px;height:42px;background:linear-gradient(135deg,#6366f1,var(--purple));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;}
-.results-title h2{font-size:20px;}
-.results-title p{color:var(--text2);font-size:12px;}
-.results-meta{display:flex;gap:18px;align-items:center;flex-wrap:wrap;}
-.meta-item{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);}
-.meta-item strong{color:var(--text);background:var(--bg3);padding:2px 9px;border-radius:5px;font-family:var(--mono);letter-spacing:1px;}
-.results-body{max-width:1200px;margin:0 auto;padding:24px 20px;}
+/* ══ RESULTS ══ */
+.res-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.res-header-left{display:flex;align-items:center;gap:12px;}
+.res-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--aqua3),var(--green2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;}
+.res-title h2{font-size:18px;color:var(--aqua);}
+.res-title p{font-size:11px;color:var(--text2);}
+.res-meta{display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+.meta-i{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);}
+.meta-i strong{color:var(--aqua);background:var(--bg3);padding:2px 8px;border-radius:4px;font-family:var(--mono);letter-spacing:1px;}
+.res-body{max-width:1100px;margin:0 auto;padding:20px;}
 
-.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin-bottom:20px;}
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px;}
 @media(max-width:900px){.stat-row{grid-template-columns:repeat(3,1fr);}}
-@media(max-width:600px){.stat-row{grid-template-columns:repeat(2,1fr);}}
-.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:16px;display:flex;align-items:center;justify-content:space-between;}
-.stat-box-left h3{font-size:12px;color:var(--text2);margin-bottom:5px;}
-.stat-box-left .stat-num{font-size:28px;font-weight:700;font-family:var(--mono);}
-.stat-box-left .stat-lbl{font-size:11px;color:var(--text3);margin-top:3px;}
-.stat-box-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+@media(max-width:580px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+.sbox{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between;}
+.sbox-l h3{font-size:11px;color:var(--text2);margin-bottom:4px;}
+.sbox-l .sn{font-size:26px;font-weight:700;font-family:var(--mono);}
+.sbox-l .sl{font-size:10px;color:var(--text3);margin-top:2px;}
+.sbox-ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
 
-.risk-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:22px;margin-bottom:18px;}
-.risk-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
-.risk-card-header h3{font-size:16px;display:flex;align-items:center;gap:8px;}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.risk-lbl{font-size:13px;font-weight:700;}
-.risk-lbl.high{color:var(--red)}.risk-lbl.med{color:var(--yellow)}.risk-lbl.low{color:var(--orange)}.risk-lbl.none{color:var(--green)}
-.risk-bar-track{height:11px;background:var(--bg3);border-radius:6px;overflow:hidden;margin-bottom:10px;}
-.risk-bar-fill{height:100%;border-radius:6px;transition:width 1s ease;background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));}
-.risk-bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:18px;}
-.risk-breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.rbi{text-align:center;}.rbi-num{font-size:26px;font-weight:700;font-family:var(--mono);}.rbi-lbl{font-size:12px;color:var(--text2);margin-top:3px;}
+.risk-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;}
+.rch{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.rch h3{font-size:14px;display:flex;align-items:center;gap:7px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;animation:gpulse 2s infinite;}
+.rlbl{font-size:12px;font-weight:700;}
+.rlbl.H{color:var(--red)}.rlbl.M{color:var(--yellow)}.rlbl.L{color:var(--orange)}.rlbl.C{color:var(--green)}
+.rbar-track{height:10px;background:var(--bg3);border-radius:5px;overflow:hidden;margin-bottom:8px;}
+.rbar-fill{height:100%;border-radius:5px;transition:width 1s ease;background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));}
+.rbar-lbls{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:16px;}
+.rbdown{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.rbi{text-align:center;}.rbi-n{font-size:24px;font-weight:700;font-family:var(--mono);}.rbi-l{font-size:11px;color:var(--text2);margin-top:2px;}
 
-.section-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;margin-bottom:14px;overflow:hidden;}
-.section-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;transition:background .15s;}
-.section-header:hover{background:rgba(255,255,255,.02);}
-.sh-left{display:flex;align-items:center;gap:12px;}
-.sh-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-.sh-text h4{font-size:14px;font-weight:600;}
-.sh-text p{color:var(--text2);font-size:12px;margin-top:1px;}
-.sh-right{display:flex;gap:5px;align-items:center;}
-.badge{padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;}
-.b-count{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:2px 9px;border-radius:11px;font-size:12px;}
-.b-high{background:rgba(255,68,68,.15);color:var(--red);border:1px solid rgba(255,68,68,.3);}
-.b-med{background:rgba(210,153,34,.15);color:var(--yellow);border:1px solid rgba(210,153,34,.3);}
-.b-low{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);}
-.chevron{color:var(--text3);transition:transform .22s;font-size:13px;}
-.section-body{border-top:1px solid var(--border);display:none;}
-.section-body.open{display:block;}
+.sec-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;}
+.sec-hdr{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;transition:background .15s;}
+.sec-hdr:hover{background:rgba(0,255,204,.02);}
+.sec-hl{display:flex;align-items:center;gap:11px;}
+.sec-ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sec-tx h4{font-size:13px;font-weight:600;}
+.sec-tx p{color:var(--text2);font-size:11px;margin-top:1px;}
+.sec-hr{display:flex;gap:5px;align-items:center;}
+.bc{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:1px 8px;border-radius:10px;font-size:11px;}
+.bh{background:rgba(255,68,102,.15);color:var(--red);border:1px solid rgba(255,68,102,.3);padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;}
+.bm{background:rgba(255,204,0,.12);color:var(--yellow);border:1px solid rgba(255,204,0,.25);padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;}
+.bl{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.2);padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;}
+.chev{color:var(--text3);transition:transform .2s;font-size:12px;}
+.sec-body{border-top:1px solid var(--border);display:none;}
+.sec-body.open{display:block;}
+.det{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;transition:background .12s;}
+.det:last-child{border-bottom:none;}
+.det:hover{background:rgba(0,255,204,.015);}
+.dd{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.dd.h{background:var(--red)}.dd.m{background:var(--yellow)}.dd.l{background:var(--orange)}
+.di{flex:1;min-width:0;}
+.dt{font-size:12px;font-weight:600;margin-bottom:2px;}
+.dp{font-size:11px;color:var(--text2);font-family:var(--mono);word-break:break-all;margin-bottom:4px;}
+.dtags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+.dtag{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:1px 6px;border-radius:3px;font-size:10px;font-family:var(--mono);}
+.dmeta{font-size:10px;color:var(--text3);margin-top:2px;}
+.ctx{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:6px 9px;font-size:10px;font-family:var(--mono);color:var(--text2);margin-top:5px;word-break:break-all;}
+.dr{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.ml-b{font-size:10px;padding:2px 6px;border-radius:3px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);}
+.rb{font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;}
+.rb.HIGH{background:var(--red);color:#fff;}
+.rb.MEDIUM{background:var(--orange);color:#fff;}
+.rb.LOW{background:var(--yellow);color:#000;}
+.empty-s{padding:30px;text-align:center;color:var(--text3);font-size:12px;}
 
-.det-item{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;transition:background .12s;}
-.det-item:last-child{border-bottom:none;}
-.det-item:hover{background:rgba(255,255,255,.02);}
-.det-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px;}
-.det-dot.h{background:var(--red)}.det-dot.m{background:var(--yellow)}.det-dot.l{background:var(--orange)}
-.det-body{flex:1;min-width:0;}
-.det-title{font-size:13px;font-weight:600;margin-bottom:3px;}
-.det-path{font-size:11px;color:var(--text2);font-family:var(--mono);word-break:break-all;margin-bottom:5px;}
-.det-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;}
-.det-tag{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:1px 7px;border-radius:3px;font-size:11px;font-family:var(--mono);}
-.det-meta{font-size:11px;color:var(--text3);margin-top:3px;}
-.ctx-box{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:11px;font-family:var(--mono);color:var(--text2);margin-top:7px;word-break:break-all;}
-.det-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
-.conf-badge{font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);}
-.risk-badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:4px;}
-.risk-badge.HIGH{background:var(--red);color:#fff;}
-.risk-badge.MEDIUM{background:var(--orange);color:#fff;}
-.risk-badge.LOW{background:var(--yellow);color:#000;}
-.empty-sec{padding:36px;text-align:center;color:var(--text3);font-size:13px;}
-
-/* DASHBOARD */
-.dash-layout{display:grid;grid-template-columns:210px 1fr;min-height:calc(100vh - 60px);}
-@media(max-width:768px){.dash-layout{grid-template-columns:1fr;}}
-.dash-sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:18px 10px;}
-.sb-user{padding:10px;margin-bottom:14px;}
-.sb-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;margin-bottom:8px;}
-.sb-name{font-weight:700;font-size:13px;}
-.sb-role{font-size:11px;color:var(--green);margin-top:2px;}
-.sb-menu{list-style:none;}
-.sb-menu li{padding:7px 11px;border-radius:5px;font-size:13px;cursor:pointer;color:var(--text2);transition:all .12s;display:flex;align-items:center;gap:7px;margin-bottom:2px;}
+/* ══ DASHBOARD ══ */
+.dash-wrap{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 58px);}
+@media(max-width:768px){.dash-wrap{grid-template-columns:1fr;}}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:18px 11px;display:flex;flex-direction:column;}
+.sb-prof{padding:11px;margin-bottom:14px;background:var(--bg3);border-radius:9px;border:1px solid var(--border);}
+.sb-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--aqua),var(--green));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;color:#000;margin-bottom:8px;box-shadow:0 0 12px rgba(0,255,204,.25);}
+.sb-name{font-weight:700;font-size:12px;color:var(--aqua);}
+.sb-role{font-size:10px;color:var(--green);margin-top:2px;display:flex;align-items:center;gap:3px;}
+.sb-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;}
+.sb-stat{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px;text-align:center;}
+.sb-sn{font-size:17px;font-weight:700;font-family:var(--mono);color:var(--aqua);}
+.sb-sl{font-size:10px;color:var(--text3);margin-top:1px;}
+.sb-div{height:1px;background:var(--border);margin:9px 0;}
+.sb-menu{list-style:none;flex:1;}
+.sb-menu li{padding:7px 10px;border-radius:5px;font-size:12px;cursor:pointer;color:var(--text2);transition:all .12s;display:flex;align-items:center;gap:7px;margin-bottom:2px;font-weight:600;}
 .sb-menu li:hover{background:var(--bg3);color:var(--text);}
-.sb-menu li.active{background:rgba(0,212,255,.1);color:var(--cyan);}
-.sb-div{height:1px;background:var(--border);margin:10px 0;}
-.dash-main{padding:24px;overflow-y:auto;}
-.dash-header{margin-bottom:20px;}
-.dash-header h2{font-size:20px;}
-.dash-header p{color:var(--text2);font-size:13px;margin-top:3px;}
-.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
-@media(max-width:900px){.dash-stats{grid-template-columns:repeat(2,1fr);}}
-.ds-card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:14px;}
-.ds-num{font-size:24px;font-weight:700;font-family:var(--mono);color:var(--cyan);}
-.ds-lbl{font-size:12px;color:var(--text2);margin-top:3px;}
-.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:11px;overflow:hidden;}
-.table-top{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
-.table-top h3{font-size:14px;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th{padding:9px 14px;text-align:left;color:var(--text2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);background:var(--bg3);}
-td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);}
+.sb-menu li.active{background:rgba(0,255,204,.08);color:var(--aqua);border:1px solid rgba(0,255,204,.12);}
+.sb-foot{margin-top:auto;padding-top:10px;}
+.dash-main{padding:22px;overflow-y:auto;}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.ph-t h2{font-size:19px;color:var(--text);}
+.ph-t p{color:var(--text2);font-size:12px;margin-top:2px;}
+.dstats{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:20px;}
+@media(max-width:1000px){.dstats{grid-template-columns:repeat(2,1fr);}}
+.dsc{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;transition:border-color .2s,box-shadow .2s;}
+.dsc:hover{border-color:var(--border2);box-shadow:var(--glow);}
+.dsc-n{font-size:26px;font-weight:900;font-family:var(--mono);}
+.dsc-l{font-size:11px;color:var(--text2);margin-top:3px;}
+.table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.tc-top{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--bg3);}
+.tc-top h3{font-size:12px;color:var(--text);font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.tc-acts{display:flex;gap:7px;align-items:center;}
+.srch{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px 9px;color:var(--text);font-size:12px;font-family:var(--font);outline:none;width:150px;}
+.srch:focus{border-color:var(--aqua);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{padding:8px 13px;text-align:left;color:var(--text3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.25);}
+td{padding:10px 13px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(255,255,255,.015);}
-.td-user{font-weight:600;}
-.td-pin{font-family:var(--mono);color:var(--cyan);letter-spacing:2px;}
-.pill{padding:2px 9px;border-radius:11px;font-size:11px;font-weight:700;}
-.pill-t{background:rgba(255,68,68,.15);color:var(--red);}
-.pill-c{background:rgba(63,185,80,.15);color:var(--green);}
-.load-row{text-align:center;padding:36px;color:var(--text3);}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px;}
+tr:hover td{background:rgba(0,255,204,.018);}
+.td-u{font-weight:700;color:var(--aqua);}
+.td-p{font-family:var(--mono);color:var(--green);letter-spacing:2px;font-weight:700;}
+.pill{padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.4px;}
+.pt{background:rgba(255,68,102,.15);color:var(--red);border:1px solid rgba(255,68,102,.3);}
+.pc{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.2);}
+.rh{color:var(--red);font-weight:700;}
+.rm{color:var(--yellow);font-weight:700;}
+.rl{color:var(--orange);font-weight:700;}
+.load-r{text-align:center;padding:34px;color:var(--text3);}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid var(--border2);border-top-color:var(--aqua);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px;}
 @keyframes spin{to{transform:rotate(360deg)}}
-#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;opacity:.2;pointer-events:none;}
 </style>
 </head>
 <body>
-<canvas id="bg-canvas"></canvas>
+
 <nav>
     <div class="logo" onclick="showView('landing')">
-        <div class="logo-shield">🛡</div>
-        NEXUS <span style="color:var(--text2);font-weight:400;font-size:15px;margin-left:2px">AC</span>
+        <div class="logo-icon">🛡</div>
+        NEXUS <span style="color:var(--text2);font-weight:400;margin-left:4px;font-size:13px">AC</span>
     </div>
     <div class="nav-right">
-        <button class="btn btn-ghost" onclick="showView('landing')">Home</button>
-        <button class="btn btn-cyan" id="nav-auth-btn" onclick="handleAuthClick()">Dashboard</button>
+        <span style="font-size:11px;color:var(--text2)"><span class="online-dot"></span>Live</span>
+        <div class="nav-user" id="nav-user" style="display:none">
+            <div class="nav-avatar" id="nav-av">A</div>
+            <span id="nav-uname" style="font-size:12px;color:var(--text)"></span>
+        </div>
+        <button class="btn btn-ghost" id="nav-dash-btn" onclick="handleDashClick()">View Dashboard</button>
+        <button class="btn btn-red" id="nav-logout" onclick="logout()" style="display:none">Logout</button>
     </div>
 </nav>
 
-<!-- LANDING -->
+<!-- ══ LANDING ══ -->
 <div class="view active" id="view-landing">
     <div class="hero">
-        <div class="hero-badge">⚡ NEXUS AC v3.1 — NOW LIVE</div>
+        <div class="hero-badge">⚡ NEXUS AC v3.1 — Now Live</div>
         <h1>ADVANCED<br><span>ANTI-CHEAT</span></h1>
-        <p>Deep-level security scanner for Minecraft. Detects modified clients, injected cheats, and suspicious files using AI-powered analysis.</p>
+        <p>Deep-level security scanner for Minecraft. Detects modified clients, injected cheats and suspicious files using AI-powered analysis.</p>
         <div class="hero-btns">
-            <button class="btn btn-cyan" style="padding:11px 26px;font-size:15px" onclick="handleAuthClick()">🔐 View Dashboard</button>
-            <button class="btn btn-ghost" style="padding:11px 26px;font-size:15px" onclick="document.getElementById('pin-sec').scrollIntoView({behavior:'smooth'})">🔍 Check Scan PIN</button>
+            <button class="hero-btn-main" onclick="handleDashClick()">🔐 View Dashboard</button>
+            <button class="hero-btn-sec" onclick="document.getElementById('pin-sec').scrollIntoView({behavior:'smooth'})">🔍 Check Scan PIN</button>
         </div>
     </div>
 
     <div class="pin-section" id="pin-sec">
         <h3>🔍 View Your Scan Results</h3>
-        <p>Enter the 6-digit PIN shown in the NEXUS scanner after your scan completes</p>
-        <div class="pin-input-row">
-            <input class="pin-input" id="pin-input" type="text" maxlength="8" placeholder="00000000"
+        <p>Enter the PIN shown in the NEXUS scanner log after your scan completes</p>
+        <div class="pin-row">
+            <input class="pin-input" id="pin-input" type="text" maxlength="10" placeholder="00000000"
                 oninput="this.value=this.value.replace(/[^0-9]/g,'')"
                 onkeydown="if(event.key==='Enter')lookupPin()">
-            <button class="btn btn-cyan" onclick="lookupPin()">VIEW</button>
+            <button class="btn btn-aqua" onclick="lookupPin()">VIEW</button>
         </div>
-        <div class="pin-error" id="pin-error"></div>
+        <div class="pin-err" id="pin-err"></div>
     </div>
 
     <div class="features">
-        <div class="feat-card"><div class="feat-icon" style="background:rgba(255,68,68,.15)">🔍</div><h4>File Deep Scan</h4><p>Analyzes .jar and .exe files using hash matching, signature detection, and ML confidence scoring.</p></div>
-        <div class="feat-card"><div class="feat-icon" style="background:rgba(0,212,255,.15)">🧠</div><h4>Memory Analysis</h4><p>Reads active process memory for cheat strings, suspicious patterns, and injected modules.</p></div>
-        <div class="feat-card"><div class="feat-icon" style="background:rgba(163,113,247,.15)">📋</div><h4>Registry Scan</h4><p>Checks shellbags, autorun entries, scheduled tasks, and DLL hijack paths.</p></div>
-        <div class="feat-card"><div class="feat-icon" style="background:rgba(63,185,80,.15)">🌐</div><h4>Browser Downloads</h4><p>Scans browser download history for known cheat client filenames and suspicious executables.</p></div>
+        <div class="feat"><div class="feat-ic" style="background:rgba(255,68,102,.12)">🔍</div><h4>File Deep Scan</h4><p>Analyzes .jar and .exe files using hash matching, signature detection and ML scoring.</p></div>
+        <div class="feat"><div class="feat-ic" style="background:rgba(0,255,204,.1)">🧠</div><h4>Memory Analysis</h4><p>Reads active process memory for cheat strings, suspicious patterns and injected modules.</p></div>
+        <div class="feat"><div class="feat-ic" style="background:rgba(163,113,247,.12)">📋</div><h4>Registry Scan</h4><p>Checks shellbags, autorun entries, scheduled tasks and DLL hijack paths.</p></div>
+        <div class="feat"><div class="feat-ic" style="background:rgba(0,230,118,.1)">🌐</div><h4>Browser Downloads</h4><p>Scans browser download history for known cheat client filenames.</p></div>
     </div>
     <footer>&copy; 2025 NEXUS AC. All rights reserved. &nbsp;|&nbsp; Powered by Supabase</footer>
 </div>
 
-<!-- RESULTS -->
+<!-- ══ RESULTS ══ -->
 <div class="view" id="view-results">
-    <div class="results-header">
-        <div class="results-header-left">
-            <div class="results-icon">📊</div>
-            <div class="results-title"><h2>Scan Results</h2><p>Detailed security analysis report</p></div>
+    <div class="res-header">
+        <div class="res-header-left">
+            <div class="res-icon">📊</div>
+            <div class="res-title"><h2>Scan Results</h2><p>Detailed security analysis report</p></div>
         </div>
-        <div class="results-meta">
-            <div class="meta-item">🔑 PIN: <strong id="r-pin">------</strong></div>
-            <div class="meta-item">🕐 <strong id="r-date">—</strong></div>
-            <button class="btn btn-ghost" onclick="history.back();showView('landing')">← Back</button>
+        <div class="res-meta">
+            <div class="meta-i">🔑 PIN: <strong id="r-pin">—</strong></div>
+            <div class="meta-i">🕐 <strong id="r-date">—</strong></div>
+            <button class="btn btn-ghost" onclick="showView('landing')">← Back</button>
         </div>
     </div>
-    <div class="results-body">
+    <div class="res-body">
         <div class="stat-row">
-            <div class="stat-box">
-                <div class="stat-box-left"><h3>Certainty Score</h3><div class="stat-num" id="r-cert" style="color:var(--red)">—</div><div class="stat-lbl" id="r-cert-lbl">—</div></div>
-                <div class="stat-box-icon" style="background:rgba(255,68,68,.15)">⚠️</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-box-left"><h3>High Risk</h3><div class="stat-num" id="r-high" style="color:var(--red)">—</div><div class="stat-lbl">Critical Threats</div></div>
-                <div class="stat-box-icon" style="background:rgba(255,68,68,.15)">☠️</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-box-left"><h3>Medium Risk</h3><div class="stat-num" id="r-med" style="color:var(--yellow)">—</div><div class="stat-lbl">Suspicious Activity</div></div>
-                <div class="stat-box-icon" style="background:rgba(210,153,34,.15)">⚠️</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-box-left"><h3>Low Risk</h3><div class="stat-num" id="r-low" style="color:var(--orange)">—</div><div class="stat-lbl">Minor Concerns</div></div>
-                <div class="stat-box-icon" style="background:rgba(240,136,62,.15)">ℹ️</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-box-left"><h3>Total Findings</h3><div class="stat-num" id="r-total" style="color:var(--cyan)">—</div><div class="stat-lbl">Items Scanned</div></div>
-                <div class="stat-box-icon" style="background:rgba(0,212,255,.15)">🔍</div>
-            </div>
+            <div class="sbox"><div class="sbox-l"><h3>Certainty Score</h3><div class="sn" id="r-cert" style="color:var(--red)">—</div><div class="sl" id="r-cert-l">—</div></div><div class="sbox-ic" style="background:rgba(255,68,102,.12)">⚠️</div></div>
+            <div class="sbox"><div class="sbox-l"><h3>High Risk</h3><div class="sn" id="r-h" style="color:var(--red)">—</div><div class="sl">Critical Threats</div></div><div class="sbox-ic" style="background:rgba(255,68,102,.12)">☠️</div></div>
+            <div class="sbox"><div class="sbox-l"><h3>Medium Risk</h3><div class="sn" id="r-m" style="color:var(--yellow)">—</div><div class="sl">Suspicious Activity</div></div><div class="sbox-ic" style="background:rgba(255,204,0,.12)">⚠️</div></div>
+            <div class="sbox"><div class="sbox-l"><h3>Low Risk</h3><div class="sn" id="r-l" style="color:var(--orange)">—</div><div class="sl">Minor Concerns</div></div><div class="sbox-ic" style="background:rgba(255,136,0,.12)">ℹ️</div></div>
+            <div class="sbox"><div class="sbox-l"><h3>Total Findings</h3><div class="sn" id="r-tot" style="color:var(--aqua)">—</div><div class="sl">Items Scanned</div></div><div class="sbox-ic" style="background:rgba(0,255,204,.1)">🔍</div></div>
         </div>
         <div class="risk-card">
-            <div class="risk-card-header">
-                <h3>📈 Risk Assessment <span style="font-size:12px;color:var(--text2);font-weight:400;margin-left:6px"><span class="live-dot"></span> Real-time Analysis</span></h3>
-                <div class="risk-lbl high" id="r-risk-lbl">—</div>
+            <div class="rch">
+                <h3>📈 Risk Assessment <span style="font-size:11px;color:var(--text2);font-weight:400;margin-left:5px"><span class="live-dot"></span> Real-time</span></h3>
+                <div class="rlbl H" id="r-rlbl">—</div>
             </div>
-            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span>Overall Risk Level</span></div>
-            <div class="risk-bar-track"><div class="risk-bar-fill" id="r-risk-bar" style="width:0%"></div></div>
-            <div class="risk-bar-labels"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
-            <div class="risk-breakdown">
-                <div class="rbi"><div class="rbi-num" style="color:var(--red)" id="rb-h">—</div><div class="rbi-lbl">High Risk</div></div>
-                <div class="rbi"><div class="rbi-num" style="color:var(--yellow)" id="rb-m">—</div><div class="rbi-lbl">Medium Risk</div></div>
-                <div class="rbi"><div class="rbi-num" style="color:var(--orange)" id="rb-l">—</div><div class="rbi-lbl">Low Risk</div></div>
-                <div class="rbi"><div class="rbi-num" style="color:var(--green)" id="rb-c">—</div><div class="rbi-lbl">Clean</div></div>
+            <div style="font-size:12px;margin-bottom:5px;color:var(--text2)">Overall Risk Level</div>
+            <div class="rbar-track"><div class="rbar-fill" id="r-rbar" style="width:0%"></div></div>
+            <div class="rbar-lbls"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+            <div class="rbdown">
+                <div class="rbi"><div class="rbi-n" style="color:var(--red)" id="rb-h">—</div><div class="rbi-l">High Risk</div></div>
+                <div class="rbi"><div class="rbi-n" style="color:var(--yellow)" id="rb-m">—</div><div class="rbi-l">Medium Risk</div></div>
+                <div class="rbi"><div class="rbi-n" style="color:var(--orange)" id="rb-l">—</div><div class="rbi-l">Low Risk</div></div>
+                <div class="rbi"><div class="rbi-n" style="color:var(--green)" id="rb-c">—</div><div class="rbi-l">Clean</div></div>
             </div>
         </div>
-        <div id="sec-file"></div>
-        <div id="sec-browser"></div>
-        <div id="sec-memory"></div>
-        <div id="sec-shell"></div>
+        <div id="s-file"></div>
+        <div id="s-browser"></div>
+        <div id="s-memory"></div>
+        <div id="s-shell"></div>
     </div>
 </div>
 
-<!-- DASHBOARD -->
+<!-- ══ DASHBOARD ══ -->
 <div class="view" id="view-dashboard">
-    <div class="dash-layout">
-        <aside class="dash-sidebar">
-            <div class="sb-user">
-                <div class="sb-avatar" id="d-avatar">N</div>
-                <div class="sb-name" id="d-name">NEXUS USER</div>
-                <div class="sb-role">● Online</div>
+    <div class="dash-wrap">
+        <aside class="sidebar">
+            <div class="sb-prof">
+                <div class="sb-av" id="sb-av">A</div>
+                <div class="sb-name" id="sb-name">ADMIN</div>
+                <div class="sb-role"><span class="online-dot"></span>Administrator</div>
+            </div>
+            <div class="sb-stats">
+                <div class="sb-stat"><div class="sb-sn" id="sb-tot">--</div><div class="sb-sl">Scans</div></div>
+                <div class="sb-stat"><div class="sb-sn" id="sb-thr" style="color:var(--red)">--</div><div class="sb-sl">Threats</div></div>
             </div>
             <div class="sb-div"></div>
             <ul class="sb-menu">
                 <li class="active">📊 Overview</li>
-                <li onclick="loadDashboard()">🔄 Refresh</li>
-                <li onclick="logout()" style="color:var(--red)">🚪 Logout</li>
+                <li onclick="loadDash()">🔄 Refresh</li>
+                <li onclick="filterClean()">✅ Clean Only</li>
+                <li onclick="filterThreats()">⚠️ Threats Only</li>
+                <li onclick="showAll()">📋 All Scans</li>
             </ul>
+            <div class="sb-foot">
+                <button class="btn btn-red" style="width:100%;padding:8px" onclick="logout()">🚪 Logout</button>
+            </div>
         </aside>
         <main class="dash-main">
-            <div class="dash-header"><h2>Dashboard Overview</h2><p>All scan results from the NEXUS cloud database</p></div>
-            <div class="dash-stats">
-                <div class="ds-card"><div class="ds-num" id="d-total">--</div><div class="ds-lbl">Total Scans</div></div>
-                <div class="ds-card"><div class="ds-num" id="d-threats">--</div><div class="ds-lbl">Threats Found</div></div>
-                <div class="ds-card"><div class="ds-num" id="d-files">--</div><div class="ds-lbl">Files Scanned</div></div>
-                <div class="ds-card"><div class="ds-num" id="d-clean">--</div><div class="ds-lbl">Clean Scans</div></div>
+            <div class="ph">
+                <div class="ph-t"><h2>Scan Overview</h2><p>Real-time data from NEXUS cloud database</p></div>
+                <button class="btn btn-aqua" onclick="loadDash()">↻ Refresh</button>
             </div>
-            <div class="table-wrap">
-                <div class="table-top"><h3>Recent Scans</h3><button class="btn btn-ghost" onclick="loadDashboard()">↻ Refresh</button></div>
+            <div class="dstats">
+                <div class="dsc"><div class="dsc-n" id="d-tot" style="color:var(--aqua)">--</div><div class="dsc-l">Total Scans</div></div>
+                <div class="dsc"><div class="dsc-n" id="d-thr" style="color:var(--red)">--</div><div class="dsc-l">Total Threats</div></div>
+                <div class="dsc"><div class="dsc-n" id="d-fil" style="color:var(--green)">--</div><div class="dsc-l">Files Scanned</div></div>
+                <div class="dsc"><div class="dsc-n" id="d-cln" style="color:var(--aqua)">--</div><div class="dsc-l">Clean Scans</div></div>
+            </div>
+            <div class="table-card">
+                <div class="tc-top">
+                    <h3>All Scan Results</h3>
+                    <div class="tc-acts">
+                        <input class="srch" id="srch" placeholder="Search username or PIN..." oninput="filterTable()">
+                        <button class="btn btn-ghost" onclick="loadDash()">↻</button>
+                    </div>
+                </div>
                 <table>
-                    <thead><tr><th>Date</th><th>Username</th><th>PIN</th><th>Files</th><th>High</th><th>Med</th><th>Low</th><th>Result</th><th>View</th></tr></thead>
-                    <tbody id="d-tbody"><tr><td colspan="9" class="load-row"><span class="spinner"></span>Loading...</td></tr></tbody>
+                    <thead><tr><th>Date</th><th>Username</th><th>PIN</th><th>Files</th><th>High</th><th>Med</th><th>Low</th><th>Result</th><th>Details</th></tr></thead>
+                    <tbody id="d-tbody"><tr><td colspan="9" class="load-r"><span class="spin"></span>Loading...</td></tr></tbody>
                 </table>
             </div>
         </main>
@@ -306,55 +335,77 @@ tr:hover td{background:rgba(255,255,255,.015);}
 </div>
 
 <script>
+// ── CONFIG ──
 const SUPA_URL='https://tmiinvqtonuldkquhbyh.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtaWludnF0b251bGRrcXVoYnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNjY1NTIsImV4cCI6MjA4Nzk0MjU1Mn0.T4K7NfP5JMegvMCeEeo4CDAD5vFBmvXlDXB_j9C0tls';
-const SH={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
-const DISCORD_AUTH='https://discord.com/oauth2/authorize?client_id=1471203475663622376&response_type=code&redirect_uri=https%3A%2F%2Fnexus-scanner.wuaze.com&scope=identify+guilds';
+const SH={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY};
+const DISCORD='https://discord.com/oauth2/authorize?client_id=1471203475663622376&response_type=code&redirect_uri=https%3A%2F%2Fzynox288.github.io%2FNexusAC-Galaxy%2F&scope=identify+guilds';
 
-async function sGet(p){const r=await fetch(SUPA_URL+p,{headers:SH,mode:'cors'});if(!r.ok){const t=await r.text();throw new Error(t);}return r.json();}
+async function sGet(p){const r=await fetch(SUPA_URL+p,{headers:SH,mode:'cors'});if(!r.ok)throw new Error(await r.text());return r.json();}
 
-function showView(n){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+n).classList.add('active');window.scrollTo(0,0);}
+// ── VIEWS ──
+function showView(n){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-'+n).classList.add('active');
+    window.scrollTo(0,0);
+    updateNav();
+}
+
+function updateNav(){
+    const li=isLoggedIn();
+    document.getElementById('nav-user').style.display=li?'flex':'none';
+    document.getElementById('nav-logout').style.display=li?'block':'none';
+    document.getElementById('nav-dash-btn').textContent=li?'Dashboard':'View Dashboard';
+}
+
+// ── AUTH ──
 function isLoggedIn(){return localStorage.getItem('nx_li')==='1';}
-function handleAuthClick(){if(isLoggedIn()){showView('dashboard');loadDashboard();}else{window.location.href=DISCORD_AUTH;}}
-function logout(){if(confirm('Logout?')){localStorage.removeItem('nx_li');showView('landing');}}
 
+function handleDashClick(){
+    if(isLoggedIn()){showView('dashboard');loadDash();}
+    else{window.location.href=DISCORD;}
+}
+
+function logout(){
+    if(confirm('Logout?')){
+        localStorage.removeItem('nx_li');
+        showView('landing');
+    }
+}
+
+// Handle Discord OAuth redirect
 const up=new URLSearchParams(window.location.search);
-if(up.get('code')){localStorage.setItem('nx_li','1');window.history.replaceState({},'',window.location.pathname);showView('dashboard');loadDashboard();}
+if(up.get('code')){
+    localStorage.setItem('nx_li','1');
+    window.history.replaceState({},'',window.location.pathname);
+    showView('dashboard');
+    loadDash();
+}else if(window.location.hash==='#dashboard'&&isLoggedIn()){
+    showView('dashboard');
+    loadDash();
+}else{
+    updateNav();
+}
 
-// PIN LOOKUP
+// ── PIN LOOKUP ──
 async function lookupPin(){
     const pin=document.getElementById('pin-input').value.trim();
-    const err=document.getElementById('pin-error');
+    const err=document.getElementById('pin-err');
     err.style.display='none';
-    if(pin.length<6){err.textContent='❌ Enter a 6-digit PIN.';err.style.display='block';return;}
+    if(pin.length<6){err.textContent='❌ Enter your full PIN.';err.style.display='block';return;}
     try{
         const data=await sGet('/rest/v1/scans?pin=eq.'+pin+'&select=*&limit=1');
-        if(!data.length){err.textContent='❌ PIN not found. Check the log in the NEXUS scanner.';err.style.display='block';return;}
-        renderResults(data[0]);showView('results');
+        if(!data.length){err.textContent='❌ PIN not found. Check the log shown in the NEXUS scanner.';err.style.display='block';return;}
+        renderResults(data[0]);
+        showView('results');
     }catch(e){err.textContent='❌ Error: '+e.message;err.style.display='block';}
 }
 
-// PARSE HELPERS
+// ── DETECTION HELPERS ──
 function parseDets(raw){
-    if(!raw)return[];
-    if(Array.isArray(raw))return raw;
-    // Try JSON array first
-    try{
-        const p=JSON.parse(raw);
-        if(Array.isArray(p))return p;
-        return[raw];
-    }catch{}
-    // Pipe-separated fallback
+    if(!raw)return[];if(Array.isArray(raw))return raw;
+    try{const p=JSON.parse(raw);if(Array.isArray(p))return p;}catch{}
     return raw.split('|').map(s=>s.trim()).filter(Boolean);
-}
-
-// If all 4 detail columns are empty but old 'details' field exists, put them in file_scans
-function normalizeScanaData(s){
-    const hasNew=(s.file_scans||s.memory_strings||s.shellbags||s.browser_downloads);
-    if(!hasNew && s.details){
-        s.file_scans=s.details;
-    }
-    return s;
 }
 function parseDet(s){
     let ml=-1;const mlM=s.match(/ML:([\d.]+)%/);if(mlM)ml=parseFloat(mlM[1]);
@@ -367,90 +418,101 @@ function parseDet(s){
     if(title.length>80)title=title.substring(0,80)+'...';
     return{title,path,tags,ml,risk,pid};
 }
-
-function buildSection(cid,icon,color,title,sub,items){
+function buildSec(cid,icon,bg,title,sub,items,isShell){
     const c=document.getElementById(cid);
     const parsed=items.map(parseDet);
     const h=parsed.filter(d=>d.risk==='HIGH').length;
     const m=parsed.filter(d=>d.risk==='MEDIUM').length;
     const l=parsed.filter(d=>d.risk==='LOW').length;
     let html='';
-    if(!parsed.length){html='<div class="empty-sec">✅ No detections in this category</div>';}
+    if(!parsed.length){html='<div class="empty-s">✅ No detections in this category</div>';}
     else parsed.forEach(d=>{
         const dc=d.risk==='HIGH'?'h':d.risk==='MEDIUM'?'m':'l';
-        const mlH=d.ml>=0?`<span class="conf-badge">ML ${d.ml.toFixed(1)}%</span>`:'';
-        const tgH=d.tags.length?`<div class="det-tags">${d.tags.map(t=>`<span class="det-tag">${t}</span>`).join('')}</div>`:'';
-        const pidH=d.pid?`<div class="det-meta">🔲 PID: ${d.pid} | Source: memory_string</div>`:'';
-        const ptH=d.path&&cid!=='sec-shell'?`<div class="det-path">${d.path}</div>`:'';
-        const ctH=cid==='sec-shell'&&d.path?`<div style="margin-top:7px"><div style="font-size:11px;color:var(--text3);margin-bottom:3px">CONTEXT</div><div class="ctx-box">${d.path}</div></div>`:'';
-        html+=`<div class="det-item"><div class="det-dot ${dc}"></div><div class="det-body"><div class="det-title">${d.title||'Detection'}</div>${ptH}${tgH}${pidH}${ctH}</div><div class="det-right">${mlH}<span class="risk-badge ${d.risk}">${d.risk}</span></div></div>`;
+        const mlH=d.ml>=0?`<span class="ml-b">ML ${d.ml.toFixed(1)}%</span>`:'';
+        const tgH=d.tags.length?`<div class="dtags">${d.tags.map(t=>`<span class="dtag">${t}</span>`).join('')}</div>`:'';
+        const pidH=d.pid?`<div class="dmeta">PID: ${d.pid}</div>`:'';
+        const ptH=!isShell&&d.path?`<div class="dp">${d.path}</div>`:'';
+        const ctH=isShell&&d.path?`<div class="ctx">${d.path}</div>`:'';
+        html+=`<div class="det"><div class="dd ${dc}"></div><div class="di"><div class="dt">${d.title||'Detection'}</div>${ptH}${tgH}${pidH}${ctH}</div><div class="dr">${mlH}<span class="rb ${d.risk}">${d.risk}</span></div></div>`;
     });
-    c.innerHTML=`<div class="section-card"><div class="section-header" onclick="toggleSec(this)"><div class="sh-left"><div class="sh-icon" style="background:${color}">${icon}</div><div class="sh-text"><h4>${title}</h4><p>${sub}</p></div></div><div class="sh-right"><span class="b-count">${parsed.length}</span>${h?`<span class="badge b-high">${h} High</span>`:''}${m?`<span class="badge b-med">${m} Medium</span>`:''}${l?`<span class="badge b-low">${l} Low</span>`:''}<span class="chevron">▼</span></div></div><div class="section-body open">${html}</div></div>`;
+    c.innerHTML=`<div class="sec-card"><div class="sec-hdr" onclick="toggleSec(this)"><div class="sec-hl"><div class="sec-ic" style="background:${bg}">${icon}</div><div class="sec-tx"><h4>${title}</h4><p>${sub}</p></div></div><div class="sec-hr"><span class="bc">${parsed.length}</span>${h?`<span class="bh">${h}H</span>`:''}${m?`<span class="bm">${m}M</span>`:''}${l?`<span class="bl">${l}L</span>`:''}<span class="chev">▼</span></div></div><div class="sec-body open">${html}</div></div>`;
 }
-function toggleSec(h){const b=h.nextElementSibling;const c=h.querySelector('.chevron');b.classList.toggle('open');c.style.transform=b.classList.contains('open')?'':'rotate(-90deg)';}
+function toggleSec(h){const b=h.nextElementSibling;const c=h.querySelector('.chev');b.classList.toggle('open');c.style.transform=b.classList.contains('open')?'':'rotate(-90deg)';}
 
-function renderResults(s){ s=normalizeScanaData(s);
-    document.getElementById('r-pin').textContent=s.pin||'------';
+// ── RENDER RESULTS ──
+function renderResults(s){
+    if(!s.file_scans&&!s.memory_strings&&!s.shellbags&&s.details)s.file_scans=s.details;
+    document.getElementById('r-pin').textContent=s.pin||'—';
     document.getElementById('r-date').textContent=s.date?new Date(s.date).toLocaleString():'Recent';
     const hi=s.high_risk||0,me=s.medium_risk||0,lo=s.low_risk||0,tot=s.threats||0,fi=s.files||0;
-    const clean=Math.max(0,fi-tot);
     document.getElementById('r-cert').textContent=tot>0?'100%':'0%';
-    document.getElementById('r-cert-lbl').textContent=tot>0?'Threats Detected':'Clean';
-    document.getElementById('r-high').textContent=hi;
-    document.getElementById('r-med').textContent=me;
-    document.getElementById('r-low').textContent=lo;
-    document.getElementById('r-total').textContent=fi;
+    document.getElementById('r-cert-l').textContent=tot>0?'Threats Detected':'Clean';
+    document.getElementById('r-h').textContent=hi;
+    document.getElementById('r-m').textContent=me;
+    document.getElementById('r-l').textContent=lo;
+    document.getElementById('r-tot').textContent=fi;
     const pct=tot>0?Math.min(100,Math.round((hi*100+me*50+lo*20)/Math.max(1,hi+me+lo))):0;
-    document.getElementById('r-risk-bar').style.width=pct+'%';
-    const rl=document.getElementById('r-risk-lbl');
-    if(hi>0){rl.textContent='HIGH RISK';rl.className='risk-lbl high';}
-    else if(me>0){rl.textContent='MEDIUM RISK';rl.className='risk-lbl med';}
-    else if(lo>0){rl.textContent='LOW RISK';rl.className='risk-lbl low';}
-    else{rl.textContent='CLEAN';rl.className='risk-lbl none';}
+    document.getElementById('r-rbar').style.width=pct+'%';
+    const rl=document.getElementById('r-rlbl');
+    if(hi>0){rl.textContent='HIGH RISK';rl.className='rlbl H';}
+    else if(me>0){rl.textContent='MEDIUM RISK';rl.className='rlbl M';}
+    else if(lo>0){rl.textContent='LOW RISK';rl.className='rlbl L';}
+    else{rl.textContent='CLEAN';rl.className='rlbl C';}
     document.getElementById('rb-h').textContent=hi;
     document.getElementById('rb-m').textContent=me;
     document.getElementById('rb-l').textContent=lo;
-    document.getElementById('rb-c').textContent=clean;
-    buildSection('sec-file',   '📄','rgba(0,212,255,.15)',  'File Scans',         'Scanned files and executables', parseDets(s.file_scans));
-    buildSection('sec-browser','⬇️','rgba(63,185,80,.15)',  'Browser Downloads',  'Downloaded browser files',      parseDets(s.browser_downloads));
-    buildSection('sec-memory', '🧠','rgba(240,136,62,.15)', 'Memory Strings',     'Suspicious memory patterns',    parseDets(s.memory_strings));
-    buildSection('sec-shell',  '📋','rgba(163,113,247,.15)','Shellbags Registry', 'Windows Shell registry entries',parseDets(s.shellbags));
+    document.getElementById('rb-c').textContent=Math.max(0,fi-tot);
+    buildSec('s-file',   '📄','rgba(0,255,204,.12)',  'File Scans',         'Scanned files and executables', parseDets(s.file_scans),false);
+    buildSec('s-browser','⬇️','rgba(0,230,118,.1)',   'Browser Downloads',  'Downloaded browser files',      parseDets(s.browser_downloads),false);
+    buildSec('s-memory', '🧠','rgba(255,136,0,.1)',   'Memory Strings',     'Suspicious memory patterns',    parseDets(s.memory_strings),false);
+    buildSec('s-shell',  '📋','rgba(163,113,247,.1)', 'Shellbags Registry', 'Windows Shell registry entries',parseDets(s.shellbags),true);
 }
 
-// DASHBOARD
-async function loadDashboard(){
+// ── DASHBOARD ──
+let allScans=[];
+async function loadDash(){
     const tb=document.getElementById('d-tbody');
-    tb.innerHTML='<tr><td colspan="9" class="load-row"><span class="spinner"></span>Loading...</td></tr>';
+    tb.innerHTML='<tr><td colspan="9" class="load-r"><span class="spin"></span>Loading...</td></tr>';
     try{
-        const data=await sGet('/rest/v1/scans?select=*&order=id.desc&limit=100');
-        const tT=data.reduce((s,r)=>s+(r.threats||0),0);
-        const tF=data.reduce((s,r)=>s+(r.files||0),0);
-        const cS=data.filter(r=>r.threats===0).length;
-        document.getElementById('d-total').textContent=data.length;
-        document.getElementById('d-threats').textContent=tT;
-        document.getElementById('d-files').textContent=tF.toLocaleString();
-        document.getElementById('d-clean').textContent=cS;
-        if(data.length){const u=data[0].username||'USER';document.getElementById('d-name').textContent=u.toUpperCase();document.getElementById('d-avatar').textContent=u[0].toUpperCase();}
-        if(!data.length){tb.innerHTML='<tr><td colspan="9" class="load-row">No scans yet.</td></tr>';return;}
-        tb.innerHTML='';
-        data.forEach(sc=>{
-            const date=sc.date?new Date(sc.date).toLocaleString():'—';
-            const pill=sc.threats>0?`<span class="pill pill-t">${sc.threats} THREATS</span>`:`<span class="pill pill-c">CLEAN</span>`;
-            const tr=document.createElement('tr');
-            tr.innerHTML=`<td>${date}</td><td class="td-user">${sc.username||'Unknown'}</td><td class="td-pin">${sc.pin||'—'}</td><td>${(sc.files||0).toLocaleString()}</td><td style="color:var(--red);font-weight:700">${sc.high_risk||0}</td><td style="color:var(--yellow);font-weight:700">${sc.medium_risk||0}</td><td style="color:var(--orange);font-weight:700">${sc.low_risk||0}</td><td>${pill}</td><td><button class="btn btn-ghost" style="padding:3px 9px;font-size:11px" onclick='viewFromDash(${JSON.stringify(sc)})'>VIEW</button></td>`;
-            tb.appendChild(tr);
-        });
-    }catch(e){tb.innerHTML=`<tr><td colspan="9" class="load-row" style="color:var(--red)">Failed: ${e.message}</td></tr>`;}
+        allScans=await sGet('/rest/v1/scans?select=*&order=id.desc&limit=200');
+        const tT=allScans.reduce((s,r)=>s+(r.threats||0),0);
+        const tF=allScans.reduce((s,r)=>s+(r.files||0),0);
+        const cS=allScans.filter(r=>r.threats===0).length;
+        document.getElementById('d-tot').textContent=allScans.length;
+        document.getElementById('d-thr').textContent=tT;
+        document.getElementById('d-fil').textContent=tF.toLocaleString();
+        document.getElementById('d-cln').textContent=cS;
+        document.getElementById('sb-tot').textContent=allScans.length;
+        document.getElementById('sb-thr').textContent=tT;
+        if(allScans.length){
+            const u=allScans[0].username||'ADMIN';
+            document.getElementById('sb-name').textContent=u.toUpperCase();
+            document.getElementById('sb-av').textContent=u[0].toUpperCase();
+            document.getElementById('nav-av').textContent=u[0].toUpperCase();
+            document.getElementById('nav-uname').textContent=u;
+        }
+        renderTable(allScans);
+    }catch(e){
+        tb.innerHTML=`<tr><td colspan="9" class="load-r" style="color:var(--red)">Error: ${e.message}</td></tr>`;
+    }
 }
-function viewFromDash(s){renderResults(s);showView('results');}
-
-// BG
-const cv=document.getElementById('bg-canvas'),cx=cv.getContext('2d');let W,H,pts=[];
-function rCv(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
-class Pt{constructor(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=(Math.random()-.5)*.4;this.vy=(Math.random()-.5)*.4;this.c=Math.random()>.5?'#00d4ff':'#a371f7';}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W)this.vx*=-1;if(this.y<0||this.y>H)this.vy*=-1;}draw(){cx.beginPath();cx.arc(this.x,this.y,1.5,0,Math.PI*2);cx.fillStyle=this.c;cx.fill();}}
-function iPts(){pts=[];for(let i=0;i<50;i++)pts.push(new Pt());}
-function aBg(){cx.clearRect(0,0,W,H);for(let i=0;i<pts.length;i++){pts[i].update();pts[i].draw();for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<140){cx.beginPath();cx.strokeStyle=`rgba(80,80,120,${1-d/140})`;cx.lineWidth=.4;cx.moveTo(pts[i].x,pts[i].y);cx.lineTo(pts[j].x,pts[j].y);cx.stroke();}}}requestAnimationFrame(aBg);}
-window.addEventListener('resize',()=>{rCv();iPts();});rCv();iPts();aBg();
+function renderTable(data){
+    const tb=document.getElementById('d-tbody');
+    if(!data.length){tb.innerHTML='<tr><td colspan="9" class="load-r">No scans found.</td></tr>';return;}
+    tb.innerHTML='';
+    data.forEach(sc=>{
+        const d=sc.date?new Date(sc.date).toLocaleString():'—';
+        const pill=sc.threats>0?`<span class="pill pt">${sc.threats} THREATS</span>`:`<span class="pill pc">CLEAN</span>`;
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td style="font-size:11px;color:var(--text2)">${d}</td><td class="td-u">${sc.username||'Unknown'}</td><td class="td-p">${sc.pin||'—'}</td><td style="color:var(--text2)">${(sc.files||0).toLocaleString()}</td><td class="rh">${sc.high_risk||0}</td><td class="rm">${sc.medium_risk||0}</td><td class="rl">${sc.low_risk||0}</td><td>${pill}</td><td><button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick='openRes(${JSON.stringify(sc).replace(/'/g,"&#39;")})'>VIEW</button></td>`;
+        tb.appendChild(tr);
+    });
+}
+function filterTable(){const q=document.getElementById('srch').value.toLowerCase();renderTable(allScans.filter(s=>(s.username||'').toLowerCase().includes(q)||(s.pin||'').includes(q)));}
+function filterClean(){renderTable(allScans.filter(s=>s.threats===0));}
+function filterThreats(){renderTable(allScans.filter(s=>s.threats>0));}
+function showAll(){renderTable(allScans);}
+function openRes(sc){renderResults(sc);showView('results');}
 </script>
 </body>
 </html>
