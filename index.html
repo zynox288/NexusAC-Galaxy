@@ -294,8 +294,20 @@
         //  SUPABASE FETCH HELPERS
         // ============================================================
         async function supaFetch(path) {
-            const r = await fetch(SUPA_URL + path, { headers: HEADERS });
-            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const r = await fetch(SUPA_URL + path, {
+                method: 'GET',
+                headers: {
+                    'apikey': SUPA_KEY,
+                    'Authorization': 'Bearer ' + SUPA_KEY,
+                    'Content-Type': 'application/json'
+                },
+                mode: 'cors'
+            });
+            if (!r.ok) {
+                const errText = await r.text();
+                console.error('Supabase error:', r.status, errText);
+                throw new Error('HTTP ' + r.status + ' — ' + errText.substring(0, 100));
+            }
             return r.json();
         }
 
