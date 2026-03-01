@@ -335,7 +335,27 @@ async function lookupPin(){
 }
 
 // PARSE HELPERS
-function parseDets(raw){if(!raw)return[];if(Array.isArray(raw))return raw;try{return JSON.parse(raw);}catch{return raw.split('|').map(s=>s.trim()).filter(Boolean);}}
+function parseDets(raw){
+    if(!raw)return[];
+    if(Array.isArray(raw))return raw;
+    // Try JSON array first
+    try{
+        const p=JSON.parse(raw);
+        if(Array.isArray(p))return p;
+        return[raw];
+    }catch{}
+    // Pipe-separated fallback
+    return raw.split('|').map(s=>s.trim()).filter(Boolean);
+}
+
+// If all 4 detail columns are empty but old 'details' field exists, put them in file_scans
+function normalizeScanaData(s){
+    const hasNew=(s.file_scans||s.memory_strings||s.shellbags||s.browser_downloads);
+    if(!hasNew && s.details){
+        s.file_scans=s.details;
+    }
+    return s;
+}
 function parseDet(s){
     let ml=-1;const mlM=s.match(/ML:([\d.]+)%/);if(mlM)ml=parseFloat(mlM[1]);
     let risk='HIGH';if(ml>=0){if(ml>=60)risk='HIGH';else if(ml>=35)risk='MEDIUM';else risk='LOW';}
@@ -369,7 +389,7 @@ function buildSection(cid,icon,color,title,sub,items){
 }
 function toggleSec(h){const b=h.nextElementSibling;const c=h.querySelector('.chevron');b.classList.toggle('open');c.style.transform=b.classList.contains('open')?'':'rotate(-90deg)';}
 
-function renderResults(s){
+function renderResults(s){ s=normalizeScanaData(s);
     document.getElementById('r-pin').textContent=s.pin||'------';
     document.getElementById('r-date').textContent=s.date?new Date(s.date).toLocaleString():'Recent';
     const hi=s.high_risk||0,me=s.medium_risk||0,lo=s.low_risk||0,tot=s.threats||0,fi=s.files||0;
