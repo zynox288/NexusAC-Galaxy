@@ -326,7 +326,14 @@ tr:hover td{background:rgba(0,255,204,.018);}
             </div>
         </div>
         <div id="s-memory"></div>
-        
+
+        <div class="search-bar-wrap" id="search-shell-wrap" style="display:none">
+            <div class="sec-search-row">
+                <span style="font-size:12px;color:var(--text2)">&#x1F4CB; Shellbags Registry</span>
+                <input class="sec-srch" id="srch-shell" placeholder="Search registry entries..." oninput="filterSec('s-shell','srch-shell',_rawShell)">
+            </div>
+        </div>
+        <div id="s-shell"></div>
     </div>
 </div>
 
@@ -528,12 +535,15 @@ function renderResults(s){
     document.getElementById('rb-c').textContent=Math.max(0,fi-tot);
     _rawBrowser = parseDets(s.browser_downloads);
     _rawMemory  = parseDets(s.memory_strings);
-    buildSec('s-file',   '📄','rgba(0,255,204,.12)', 'File Scans',        'Scanned .jar/.exe files',       parseDets(s.file_scans),false);
-    buildSec('s-browser','⬇️','rgba(0,230,118,.1)',  'Browser Downloads', 'Browser history & Downloads folder', _rawBrowser, false);
-    buildSec('s-memory', '🧠','rgba(255,136,0,.1)',  'Memory Strings',    'Live process memory patterns',  _rawMemory,  false);
+    _rawShell   = parseDets(s.shellbags);
+    buildSec('s-file',   '📄','rgba(0,255,204,.12)',  'File Scans',         'Scanned .jar/.exe files',            parseDets(s.file_scans), false);
+    buildSec('s-browser','⬇️','rgba(0,230,118,.1)',   'Browser Downloads',  'Browser history & Downloads folder', _rawBrowser,             false);
+    buildSec('s-memory', '🧠','rgba(255,136,0,.1)',   'Memory Strings',     'Live process memory patterns',       _rawMemory,              false);
+    buildSec('s-shell',  '📋','rgba(163,113,247,.1)', 'Shellbags Registry', 'Windows registry access history',    _rawShell,               true);
     // Show/hide search bars
     document.getElementById('search-browser-wrap').style.display = _rawBrowser.length ? 'block' : 'none';
     document.getElementById('search-memory-wrap').style.display  = _rawMemory.length  ? 'block' : 'none';
+    document.getElementById('search-shell-wrap').style.display   = _rawShell.length   ? 'block' : 'none';
 }
 
 // ── DASHBOARD ──
@@ -583,7 +593,7 @@ function showAll(){renderTable(allScans);}
 function openRes(sc){renderResults(sc);showView('results');}
 
 // Raw detection arrays for search filtering
-let _rawBrowser=[], _rawMemory=[];
+let _rawBrowser=[], _rawMemory=[], _rawShell=[];
 
 function filterSec(secId, inputId, rawArr){
     const q = document.getElementById(inputId).value.toLowerCase();
@@ -592,7 +602,7 @@ function filterSec(secId, inputId, rawArr){
     const iconMap = {'s-browser':['⬇️','rgba(0,230,118,.1)','Browser Downloads','Browser history & Downloads folder'],
                      's-memory': ['🧠','rgba(255,136,0,.1)', 'Memory Strings',   'Live process memory patterns']};
     const [icon,bg,title,sub] = iconMap[secId]||['📄','rgba(0,255,204,.12)','Results',''];
-    buildSec(secId, icon, bg, title, sub, filtered, isShell);
+    buildSec(secId, icon, bg, title, sub, filtered, secId==='s-shell');
     // Keep section open after filter
     const body = document.querySelector('#'+secId+' .sec-body');
     if(body) body.classList.add('open');
